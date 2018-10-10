@@ -13,3 +13,6 @@
 
 # Data files
 data/*.csv
+
+#IDE
+.idea/
