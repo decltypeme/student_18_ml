@@ -7,6 +7,7 @@ import (
 	"encoding/csv"
 	"strconv"
 	"math/rand"
+	"errors"
 )
 
 func init(){
@@ -21,7 +22,7 @@ func handleError(err error) {
 
 //GetDataPointsFromCSV returns DataPoints with the data points contained
 //in a csv file whose path is given by a string
-func GetDataPointsFromCSV(fileName string) regression.DataPoints {
+func GetDataPointsFromCSV(fileName string) (regression.DataPoints, error) {
 	file, err := os.Open(fileName)
 	handleError(err)
 	defer file.Close()
@@ -37,6 +38,8 @@ func GetDataPointsFromCSV(fileName string) regression.DataPoints {
 	//Check that the records' fields count is the same as the headers fields count
 	if fieldsCount != len(headers) {
 		log.Panic("Fields count must be the same as the headers fields count\n")
+		return nil, errors.New(
+			"Fields count must be the same as the headers fields count")
 	}
 	//Initialize the features dataset
 	features := make([][]float64, len(records))
@@ -48,20 +51,22 @@ func GetDataPointsFromCSV(fileName string) regression.DataPoints {
 			//TODO(islam): Make this tolerate whitespaces
 			row[j], err = strconv.ParseFloat(v, 64)
 			handleError(err)
+			return nil, err
 		}
 		features[i] = row
 	}
 
 	//Create and return the data points
-	return regression.MakeDataPoints(features, fieldsCount-1)
+	return regression.MakeDataPoints(features, fieldsCount-1), nil
 }
 
-func TrainRegressionModel(points regression.DataPoints) *regression.Regression {
+func TrainRegressionModel(points regression.DataPoints) (*regression.Regression,
+	error) {
 	r := new(regression.Regression)
 	for _, p := range points {
 		r.Train(p)
 	}
 	err := r.Run()
 	handleError(err)
-	return r;
+	return r, nil;
 }
