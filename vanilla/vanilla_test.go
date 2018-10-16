@@ -13,14 +13,18 @@ func TestMain(m *testing.M) {
 }
 
 func TestTrainRegressionModel(t *testing.T) {
-	points := vanilla.GetDataPointsFromCSV("tests/test1.csv")
-	r := vanilla.TrainRegressionModel(points)
+	points, err := vanilla.GetDataPointsFromCSV("tests/test1.csv")
+	require.Nil(t, err)
+	r, err := vanilla.TrainRegressionModel(points)
+	require.Nil(t, err)
 	log.Print(r.Formula)
 	for i := 0; i <= 3; i++ {
 		require.True(t, math.IsNaN(r.Coeff(0)))
 	}
-	points = vanilla.GetDataPointsFromCSV("tests/test2.csv")
-	r = vanilla.TrainRegressionModel(points)
+	points, err = vanilla.GetDataPointsFromCSV("tests/test2.csv")
+	require.Nil(t, err)
+	r, err = vanilla.TrainRegressionModel(points)
+	require.Nil(t, err)
 	log.Print(r.Formula)
 	for i := 0; i <= 3; i++ {
 		require.True(t, !math.IsNaN(r.Coeff(0)))
@@ -28,7 +32,8 @@ func TestTrainRegressionModel(t *testing.T) {
 }
 
 func TestGetDataPointsFromCSV(t *testing.T) {
-	points := vanilla.GetDataPointsFromCSV("tests/test1.csv")
+	points, err := vanilla.GetDataPointsFromCSV("tests/test1.csv")
+	require.Nil(t, err)
 	require.Equal(t, len(points), 5)
 	require.Equal(t, points[0].Variables[0], 12.5)
 	require.Equal(t, points[0].Observed, 5.0)
