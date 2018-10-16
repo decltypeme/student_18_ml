@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/decltypeme/student_18_ml.svg?branch=master)](https://travis-ci.org/decltypeme/student_18_ml)
+[![Coverage Status](https://coveralls.io/repos/github/dedis/student_18_ml/badge.svg)](https://coveralls.io/github/dedis/student_18_ml)
 This reflects the build from the cothority master branch.
 
 ## About
