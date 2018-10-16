@@ -16,3 +16,7 @@ data/*.csv
 
 #IDE
 .idea/
+
+# dep
+vendor/
+Gopkg.lock
