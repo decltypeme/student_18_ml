@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/decltypeme/student_18_ml.svg?branch=master)](https://travis-ci.org/decltypeme/student_18_ml)
+
 ## About
 
 This is a repository for creating a confidentiality-preserving machine learning pipeline via auditable secret sharing.
