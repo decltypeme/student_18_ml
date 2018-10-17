@@ -4,12 +4,12 @@ Bf              = 4
 Rounds          = 1
 RunWait         = "6000s"
 Suite           = "Ed25519"
-Dataset         = "../../../data/dataR2.csv"
+Dataset         = "../../../data/dataR2Small.csv"
 
 # Keep the different columns in case someboday wants to run another battery
 # of tests
 
-Keep,   Transactions, BatchSize,  Hosts,  Delay, BlockInterval, CothorityNodes
-true,   200,          5,          5,     10,    "1s", 5
+Keep,  BatchSize,  Hosts,  Delay, BlockInterval
+true,   5,          5,     10,    "1s"
 # true,   200,          10,         10,     10,    "2s"
 # true,   200,          20,         10,     10,    "2s"

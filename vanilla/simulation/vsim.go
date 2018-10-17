@@ -13,6 +13,7 @@ import (
 	"github.com/dedis/student_18_ml/vanilla"
 	"github.com/dedis/cothority"
 	"encoding/json"
+	"github.com/dedis/onet/simul/monitor"
 )
 
 func init() {
@@ -21,7 +22,6 @@ func init() {
 
 type VanillaSimulation struct {
 	onet.SimulationBFTree
-	CothorityNodes 	int
 	Dataset		 	string
 	BlockInterval 	string
 	Keep          	bool
@@ -147,6 +147,7 @@ func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
 	read_proofs := make([]*byzcoin.Proof, len(records))
 	read_insts := make([]byzcoin.InstanceID, len(records))
 
+	prepare_t := monitor.NewTimeMeasure("prepare")
 	for i, secret := range *secrets {
 		s.Client.SpawnDarc(s.admin, s.gm.GenesisDarc, (*darcs)[i], 4)
 		log.Printf("Darc %d spawned", i)
@@ -170,27 +171,34 @@ func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
 		}
 		write_proofs[i] = prf
 	}
+	prepare_t.Record()
 
+	pipeline_t := monitor.NewTimeMeasure("pipeline")
 	for i, darc := range *darcs {
+		read_spawn_t := monitor.NewTimeMeasure("read_spawn")
 		reply, err := s.Client.AddRead(write_proofs[i], consumer, darc, 0)
 		if err != nil{
-			return errors.New("couldn't spawn write instance: " + err.Error())
+			return errors.New("couldn't spawn read instance: " + err.Error())
 		}
 		read_insts[i] = reply.InstanceID
+		read_spawn_t.Record()
 	}
 
 	//Wait for all read instructions to be executed
 	for i, _ := range read_insts {
+		read_proof_t := monitor.NewTimeMeasure("read_proof")
 		prf, err := s.Client.WaitProof(read_insts[i], s.gm.BlockInterval, nil)
 		if err != nil{
 			return errors.New("couldn't get read proof: " + err.Error())
 		}
 		read_proofs[i] = prf
+		read_proof_t.Record()
 	}
 
 	points := make([]vanilla.MlDataPoint, len(records))
 
 	for i, _ := range points {
+		decrypt_t := monitor.NewTimeMeasure("decrypt")
 		reply, err := s.Client.DecryptKey(&calypso.DecryptKey{
 			*read_proofs[i], *write_proofs[i]})
 		if err != nil{
@@ -208,6 +216,7 @@ func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
 		if err != nil{
 			return errors.New("couldn't cast data point from binary: " + err.Error())
 		}
+		decrypt_t.Record()
 	}
 
 	r, err := vanilla.VanillaTrainRegressionModel(points)
@@ -216,12 +225,12 @@ func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
 	} else {
 		log.Printf("Training finished, formula is: %s", r.Formula)
 	}
-
+	pipeline_t.Record()
 	// We wait a bit before closing because c.GetProof is sent to the
 	// leader, but at this point some of the children might still be doing
 	// updateCollection. If we stop the simulation immediately, then the
 	// database gets closed and updateCollection on the children fails to
 	// complete.
-	time.Sleep(2*time.Second)
+	time.Sleep(10*time.Second)
 	return nil
 }
