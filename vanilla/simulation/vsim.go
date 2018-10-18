@@ -46,7 +46,7 @@ func NewSimulationService(config string) (onet.Simulation, error) {
 func (s *VanillaSimulation) Setup(dir string, hosts []string) (
 	*onet.SimulationConfig, error) {
 	sc := &onet.SimulationConfig{}
-	s.CreateRoster(sc, hosts, 2000)
+	s.CreateRoster(sc, hosts, 2005)
 	err := s.CreateTree(sc)
 	if err != nil {
 		return nil, err
@@ -231,6 +231,6 @@ func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
 	// updateCollection. If we stop the simulation immediately, then the
 	// database gets closed and updateCollection on the children fails to
 	// complete.
-	time.Sleep(10*time.Second)
+	time.Sleep(time.Second)
 	return nil
 }

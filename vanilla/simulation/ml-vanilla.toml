@@ -2,14 +2,22 @@ Simulation      = "VanillaMl"
 Servers         = 2
 Bf              = 4
 Rounds          = 1
-RunWait         = "6000s"
+RunWait         = "600000s"
 Suite           = "Ed25519"
+#Dataset         = "../../../data/dataR2.csv"
 Dataset         = "../../../data/dataR2Small.csv"
 
 # Keep the different columns in case someboday wants to run another battery
 # of tests
-
-Keep,  BatchSize,  Hosts,  Delay, BlockInterval
-true,   5,          5,     10,    "1s"
+# To run with hosts >  10, you need to change the channel length to 1000
+Keep,  Hosts,  Delay, BlockInterval
+true,  4,     2,    "1s"
+#true,  8,     2,    "1s"
+#true,  12,     2,    "1s"
+#true,  16,     2,    "1s"
+#true,  20,     2,    "1s"
+#true,  24,     2,    "1s"
+#true,  28,     2,    "1s"
+#true,  32,     2,    "1s"
 # true,   200,          10,         10,     10,    "2s"
 # true,   200,          20,         10,     10,    "2s"

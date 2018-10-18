@@ -31,7 +31,8 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/decltypeme/cothority"
+  name = "github.com/dedis/cothority"
+  source = "github.com/decltypeme/cothority"
 
 [[constraint]]
   branch = "master"

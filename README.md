@@ -6,24 +6,21 @@ This reflects the build from the decltypeme master branch.
 
 This is a repository for creating a confidentiality-preserving machine learning pipeline via auditable secret sharing.
 
-## Vanilla Pipeline
-
-The Vanilla pipeline is a simple application of the [CALYPSO framework](https://github.com/dedis/cothority/tree/master/calypso) for auditable secret sharing.
-
 ### Dependencies
+
+Please refer to the file [Gopkg.toml](Gopkg.toml)
 
 1. [Multivariable Linear Regression in Go (golang)](https://github.com/sajari/regression) and verify it is working.
 2. [CALYPSO Service](https://github.com/dedis/cothority/tree/master/calypso)
+3. [dedis/onet](github.com/dedis/onet)
+4. [github.com/stretchr/testify](github.com/stretchr/testify)
+5. [github.com/BurntSushi/toml](github.com/BurntSushi/toml)
 
-```
-
-```
-
-## Strategy
-
-In this implementation, a machine learning central node is created. Data are collected via CALYPSO from the data providers and consumed by the machine learning model creator (the data consumer).
-
-See [`vanilla/`](vanilla/) for more details.
 ## Data
 
 For benchmarking and simulations we use the [Breast Cancer Coimbra Data Set](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Coimbra). For more information, please refer to [`data/`](data/README.md)
+
+## Vanilla Pipeline
+The Vanilla pipeline is a simple application of the [CALYPSO framework](https://github.com/dedis/cothority/tree/master/calypso) for auditable secret sharing.
+
+See [`vanilla/`](vanilla/) for more details.
