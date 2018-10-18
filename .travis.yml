@@ -4,8 +4,7 @@ go:
   - 1.11.x
 
 env:
-  - DEP_VERSION="0.5.0"
-  - TRAVIS_HERE=1
+  - DEP_VERSION="0.5.0" TRAVIS_HERE=1
 
 before_install:
   # Donwload the dataset
