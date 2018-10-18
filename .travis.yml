@@ -5,6 +5,7 @@ go:
 
 env:
   - DEP_VERSION="0.5.0"
+  - TRAVIS_HERE=1
 
 before_install:
   # Donwload the dataset
@@ -21,4 +22,4 @@ notifications:
   email: false
 
 script:
-  - go test -v -race ./...
+  - ./test.sh
