@@ -7,6 +7,8 @@ env:
   - DEP_VERSION="0.5.0"
 
 before_install:
+  # Donwload the dataset
+  - ./data/download.sh
   # Download the binary to bin folder in $GOPATH
   - curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep
   # Make the binary executable
