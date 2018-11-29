@@ -1,4 +1,4 @@
-Simulation      = "VanillaSimulation"
+Simulation      = "DuakhetySimulation"
 Servers         = 2
 Bf              = 4
 Rounds          = 1

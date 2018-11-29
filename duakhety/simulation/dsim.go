@@ -1,33 +1,33 @@
 package main
 
 import (
-	"errors"
-	"time"
-
-	"github.com/BurntSushi/toml"
-	"github.com/dedis/cothority/byzcoin"
-	"github.com/dedis/cothority/darc"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
-	"github.com/dedis/cothority/calypso"
+	"github.com/dedis/onet/simul/monitor"
+	"github.com/BurntSushi/toml"
 	"github.com/dedis/student_18_ml/vanilla"
+	"github.com/dedis/cothority/byzcoin"
+	"errors"
+	"time"
+	"github.com/dedis/cothority/calypso"
+	"github.com/dedis/cothority/darc"
 	"github.com/dedis/cothority"
 	"encoding/json"
-	"github.com/dedis/onet/simul/monitor"
 )
 
 func init() {
-	onet.SimulationRegister("VanillaSimulation", NewSimulationService)
+	onet.SimulationRegister("DuakhetySimulation", NewSimulationService)
 }
 
-type VanillaSimulation struct{
+type MlPipelineSimulation struct {
 	vanilla.MlSimulation
+	AggregationTree onet.SimulationBFTree
 }
 
 // NewSimulationService returns the new simulation, where all fields are
 // initialised using the config-file
 func NewSimulationService(config string) (onet.Simulation, error) {
-	es := &VanillaSimulation{}
+	es := &MlPipelineSimulation{}
 	_, err := toml.Decode(config, es)
 	if err != nil {
 		return nil, err
@@ -36,11 +36,17 @@ func NewSimulationService(config string) (onet.Simulation, error) {
 }
 
 // Setup creates the tree used for that simulation
-func (s *VanillaSimulation) Setup(dir string, hosts []string) (
+func (s *MlPipelineSimulation) Setup(dir string, hosts []string) (
 	*onet.SimulationConfig, error) {
 	sc := &onet.SimulationConfig{}
 	s.CreateRoster(sc, hosts, 2005)
 	err := s.CreateTree(sc)
+	if err != nil {
+		return nil, err
+	}
+	//Create the aggregation tree for the Prio protocol
+	s.CreateRoster(sc, hosts, 2006)
+	err = s.AggregationTree.CreateTree(sc)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +57,7 @@ func (s *VanillaSimulation) Setup(dir string, hosts []string) (
 // by the server. Here we call the 'Node'-method of the
 // SimulationBFTree structure which will load the roster- and the
 // tree-structure to speed up the first round.
-func (s *VanillaSimulation) Node(config *onet.SimulationConfig) error {
+func (s *MlPipelineSimulation) Node(config *onet.SimulationConfig) error {
 	index, _ := config.Roster.Search(config.Server.ServerIdentity.ID)
 	if index < 0 {
 		log.Fatal("Didn't find this node in roster")
@@ -61,7 +67,7 @@ func (s *VanillaSimulation) Node(config *onet.SimulationConfig) error {
 }
 
 // CreateLedger creates a new ledger for a CALYPSO service
-func (s *VanillaSimulation) CreateLedger(config *onet.SimulationConfig) error {
+func (s *MlPipelineSimulation) CreateLedger(config *onet.SimulationConfig) error {
 
 	gm, err := byzcoin.DefaultGenesisMsg(byzcoin.CurrentVersion, config.Roster,
 		[]string{"spawn:" + byzcoin.ContractDarcID},
@@ -93,10 +99,10 @@ func (s *VanillaSimulation) CreateLedger(config *onet.SimulationConfig) error {
 	return nil
 }
 
-
 // Run is used on the destination machines and runs a number of
 // rounds
-func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
+func (s *MlPipelineSimulation) Run(config *onet.SimulationConfig) error {
+	//TODO(islam): Refactor this common snippet in a separate function
 	//Create admin who can approve dark changes
 	s.Admin = darc.NewSignerEd25519(nil, nil)
 	//Create the identity of the model builder
@@ -141,8 +147,6 @@ func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
 	read_insts := make([]byzcoin.InstanceID, len(records))
 
 	prepare_t := monitor.NewTimeMeasure("prepare")
-	//uint64 counter := 0
-	//counter = counter  + 1
 	for i, secret := range *secrets {
 		s.Client.SpawnDarc(s.Admin, uint64(i+1), s.Gm.GenesisDarc, *darcs[i], 4)
 		log.Printf("Darc %d spawned", i)
@@ -172,7 +176,7 @@ func (s *VanillaSimulation) Run(config *onet.SimulationConfig) error {
 	for i, darc := range darcs {
 		read_spawn_t := monitor.NewTimeMeasure("read_spawn")
 		reply, err := s.Client.AddRead(write_proofs[i], consumer,
-			uint64(i+1), *darc, 0)
+			uint64(i+1),*darc, 0)
 		if err != nil{
 			return errors.New("couldn't spawn read instance: " + err.Error())
 		}

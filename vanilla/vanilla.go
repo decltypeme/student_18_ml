@@ -25,13 +25,6 @@ func handleError(err error) {
 	}
 }
 
-// MlDataPoint is a class containing a training dataPoint.
-type MlDataPoint struct {
-	description string
-	Label  float64
-	Variables []float64
-}
-
 //GetDataPointsFromCSV returns DataPoints with the data points contained
 //in a csv file whose path is given by a string
 func GetDataPointsFromCSV(fileName string) (regression.DataPoints, error) {
@@ -97,12 +90,12 @@ func VanillaTrainRegressionModel(points []MlDataPoint) (*regression.Regression,
 // with them given training points
 func AssociateProviders(providers []darc.Identity,
 	points regression.DataPoints, desc string, consumer *darc.Identity) (
-	*[][]byte, *[]darc.Darc, error){
+	*[][]byte, []*darc.Darc, error){
 	if len(providers) != len(points){
 		return nil, nil,
 			errors.New("providers and points must have the same length")
 	}
-	darcs := make([]darc.Darc, len(providers))
+	darcs := make([]*darc.Darc, len(providers))
 	secrets := make([][]byte, len(providers))
 
 	for i, point := range points {
@@ -116,7 +109,7 @@ func AssociateProviders(providers []darc.Identity,
 		}
 		secrets[i] = bytesBuffer.Bytes()
 		//Create a similar darc with write access to the provider
-		darcs[i] = *darc.NewDarc(darc.InitRules([]darc.Identity{providers[i]},
+		darcs[i] = darc.NewDarc(darc.InitRules([]darc.Identity{providers[i]},
 			[]darc.Identity{providers[i]}), []byte("Provider" + string(i)))
 		// provider1 is the owner, while reader1 is allowed to do read
 		darcs[i].Rules.AddRule(darc.Action("spawn:"+calypso.ContractWriteID),
@@ -126,7 +119,7 @@ func AssociateProviders(providers []darc.Identity,
 				expression.InitOrExpr(consumer.String()))
 		}
 	}
-	return &secrets, &darcs, nil
+	return &secrets, darcs, nil
 }
 
 // GetIdentitiesFromSigners gets identities from signers
